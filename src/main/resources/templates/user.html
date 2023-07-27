@@ -3,9 +3,20 @@
 <head>
     <title>Spring Security Example</title>
 </head>
-<body>
-<h1>User, welcome spring boot security page!</h1>
-
-
-</body>
+    <body>
+        <h1>User, welcome spring boot security page!</h1>
+        <div th:insert="~{edit :: out}"></div>
+        <label for="username">Username </label>
+        <p th:text="${user.getUsername()}" id="username">username</p>
+        <br>
+        <label for="name">Name </label>
+        <p th:text="${user.getName()}" id="name">name</p>
+        <br>
+        <label for="surname">Surname </label>
+        <p th:text="${user.getSurname()}" id="surname">surname</p>
+        <br>
+        <label for="email">Email </label>
+        <p th:text="${user.getEmail()}" id="email">email</p>
+        <br>
+    </body>
 </html>

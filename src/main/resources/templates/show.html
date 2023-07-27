@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>User</title>
+</head>
+<body>
+<p th:text="${user.getId()}">VALUE</p>
+<p th:text="${user.getName()}">VALUE</p>
+<p th:text="${user.getSurname()}">VALUE</p>
+<p th:text="${user.getEmail()}">VALUE</p>
+<a th:href="@{/users/index(param name='param1')}">Edit</a>
+<form th:action="@{/admin/user/{id}(id=${user.getId()})}">
+  <input type="submit" value="update"/>
+</form>
+<form th:method="DELETE" th:action="@{/users/{id}(id=${user.getId()})}">
+  <input type="submit" value="Delete"/>
+</form>
+</body>
+</html>
+
+
+<!--<!DOCTYPE html>-->
+<!--<html xmlns:th="http://www.thymeleaf.org">-->
+<!--<head>-->
+<!--  <meta charset="UTF-8"/>-->
+<!--  <title>User</title>-->
+<!--</head>-->
+<!--<body>-->
+<!--<h2>User information</h2>-->
+<!--<br>-->
+<!--<div>-->
+<!--  <table>-->
+<!--    <tr>-->
+<!--      <th>Id</th>-->
+<!--      <th>Name</th>-->
+<!--      <th>Surname</th>-->
+<!--      <th>Email</th>-->
+<!--      <th>Operations</th>-->
+<!--    </tr>-->
+<!--    <tr th:each="user : ${user}">-->
+<!--      <td th:utext="${user.getId()}">...</td>-->
+<!--      <td th:utext="${user.getName()}">...</td>-->
+<!--      <td th:utext="${user.getSurname()()}">...</td>-->
+<!--      <td th:utext="${user.getEmail()}">...</td>-->
+<!--      <td>-->
+<!--        <button type="submit">-->
+<!--          <a th:href="@{/edit(id=${user.getId()})}">Update</a>-->
+<!--        </button>-->
+<!--      </td>-->
+<!--      <td>-->
+<!--        <form th:method="DELETE" th:action="@{/{id}(id=${user.getId()})}" th:object="${user}">-->
+<!--          <input type="hidden" name="id" th:value="${user.getId()}">-->
+<!--          <button type="submit">Delete</button>-->
+<!--        </form>-->
+<!--      </td>-->
+<!--    </tr>-->
+<!--  </table>-->
+<!--  <br>-->
+<!--  <input type="button" value="Add User"-->
+<!--         onclick="window.location.href = 'addNewUser'">-->
+<!--</div>-->
+
+<!--</body>-->
+<!--</html>-->
