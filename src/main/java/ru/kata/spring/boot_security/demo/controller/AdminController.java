@@ -5,27 +5,27 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import ru.kata.spring.boot_security.demo.model.User;
+import ru.kata.spring.boot_security.demo.service.UserService;
 import ru.kata.spring.boot_security.demo.service.UserServiceImpl;
 
 @Controller
 @RequestMapping("/admin")
 public class AdminController {
-    private final UserServiceImpl userService;
+    private final UserService userService;
     @Autowired
-    public AdminController(UserServiceImpl userService) {
+    public AdminController(UserService userService) {
         this.userService = userService;
     }
     @GetMapping()
-    public String index(Model model){
+    public String indexOfUsers(Model model){
         //get all users from DAO & setting and we will pass on the display and presentation
         model.addAttribute("users", userService.getListOfUsers());
         return "show";
     }
     @GetMapping("/users")
-    public String read(@RequestParam("param1") Integer id, Model model) {
+    public String readUserById(@RequestParam("param1") Integer id, Model model) {
         //Получим одного человека по ИД из ДАО и передадим на отображение в представление
         model.addAttribute("param1", userService.readUserById(id));
-//        model.addAttribute("user", user);
         return "show";
     }
     @GetMapping("/new")
@@ -33,8 +33,8 @@ public class AdminController {
         return "new";
     }
     @PostMapping()      //\\
-    public String create(@ModelAttribute("user") User user) {
-        userService.createUser(user);
+    public String createNewUSer(@ModelAttribute("user") User user) {
+        userService.createNewUser(user);
         return "redirect:/users";       //Переход на страницу списка
     }
     @GetMapping("/{id}/edit")
@@ -43,13 +43,13 @@ public class AdminController {
         return "edit";
     }
     @PatchMapping("/{id}")
-    public String update(@ModelAttribute("user") User user, @PathVariable("id") int id) {
-        userService.update(user);
+    public String updateUser(@ModelAttribute("user") User user, @PathVariable("id") int id) {
+        userService.updateUser(user);
         return "redirect:/users";
     }
 
     @DeleteMapping("/{id}")
-    public String delete(@PathVariable("id") int id) {
+    public String deleteUser(@PathVariable("id") int id) {
         userService.deleteById(id);
         return "redirect:/users";
     }

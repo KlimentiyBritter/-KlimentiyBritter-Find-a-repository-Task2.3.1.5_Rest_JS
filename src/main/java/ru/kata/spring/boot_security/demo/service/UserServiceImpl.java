@@ -42,7 +42,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
 
     @Override
     @Transactional
-    public boolean createUser(User user) {
+    public boolean createNewUser(User user) {
         long l=2;
         if(userRepository.find(user.getUsername())==null){
             user.setRoles(Collections.singleton(roleRepository.getOne(2L)));
@@ -61,7 +61,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
 
     @Override
     @Transactional
-    public void update(User user) {
+    public void updateUser(User user) {
         User currentUser = userRepository.find(user.getSurname());
         user.setRoles(currentUser.getRoles());
         user.setPassword(currentUser.getPassword());
