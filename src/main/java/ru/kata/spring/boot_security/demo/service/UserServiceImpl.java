@@ -12,50 +12,42 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.kata.spring.boot_security.demo.model.Role;
 import ru.kata.spring.boot_security.demo.model.User;
-import ru.kata.spring.boot_security.demo.repository.RoleRepository;
 import ru.kata.spring.boot_security.demo.repository.UserRepository;
-
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
-@Transactional(readOnly = true)
 public class UserServiceImpl implements UserService, UserDetailsService {
     private final UserRepository userRepository;
-    private final RoleRepository roleRepository;
     private final PasswordEncoder passwordEncoder;
     @Autowired
-    public UserServiceImpl(UserRepository userRepository, RoleRepository roleRepository, @Lazy PasswordEncoder passwordEncoder) {
+    public UserServiceImpl(UserRepository userRepository, @Lazy PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
-        this.roleRepository = roleRepository;
         this.passwordEncoder = passwordEncoder;
     }
 
-    @Override
     @Transactional(readOnly = true)
+    @Override
     public List<User> getListOfUsers() {
         return userRepository.findAll();
     }
 
     @Override
     @Transactional
-    public boolean createNewUser(User user) {
-        long l=2;
-        if(userRepository.find(user.getUsername())==null){
-            user.setRoles(Collections.singleton(roleRepository.getOne(2L)));
-            user.setPassword(passwordEncoder.encode(user.getPassword()));
-            userRepository.save(user);
-            return true;
-        }
-        return false;
+    public void createNewUser(User user) {
+        user.setPassword(passwordEncoder.encode(user.getPassword()));
+        userRepository.save(user);
     }
 
     @Override
-    @Transactional
     public User readUserById(long id) {
-        return userRepository.getOne(id);
+        Optional<User> userID = userRepository.findById(id);
+        if(userID.isPresent())
+            return userID.get();
+        else
+            return null;
     }
 
     @Override
