@@ -18,7 +18,7 @@ public class AdminController {
     }
     @GetMapping()
     public String indexOfUsers(Model model){
-        //get all users from DAO & setting and we will pass on the display and presentation
+        //get all users from DAO & setting & we will pass on the display and presentation
         model.addAttribute("users", userService.getListOfUsers());
         return "show";
     }
@@ -29,16 +29,16 @@ public class AdminController {
         return "show";
     }
     @GetMapping("/new")
-    public String newUser(@ModelAttribute("user") User user){
+    public String enterNewUser(@ModelAttribute("user") User user){
         return "new";
     }
     @PostMapping()      //\\
-    public String createNewUSer(@ModelAttribute("user") User user) {
+    public String createNewUser(@ModelAttribute("user") User user) {
         userService.createNewUser(user);
         return "redirect:/users";       //Переход на страницу списка
     }
     @GetMapping("/{id}/edit")
-    public String edit(Model model, @PathVariable("id") int id){
+    public String editOfUsers(Model model, @PathVariable("id") int id){
         model.addAttribute("user", userService.readUserById(id));
         return "edit";
     }
