@@ -8,7 +8,6 @@ import ru.kata.spring.boot_security.demo.model.User;
 import ru.kata.spring.boot_security.demo.repository.UserRepository;
 import ru.kata.spring.boot_security.demo.service.RoleService;
 import ru.kata.spring.boot_security.demo.service.UserService;
-import ru.kata.spring.boot_security.demo.service.UserServiceImpl;
 
 import java.security.Principal;
 import java.util.List;
@@ -16,19 +15,14 @@ import java.util.List;
 @Controller
 @RequestMapping("/admin")
 public class AdminController {
-    private UserService userService;
-    private UserRepository userRepository;
-    private RoleService roleService;
+    private final UserService userService;
+    private final UserRepository userRepository;
+    private final RoleService roleService;
+
     @Autowired
-    public void setUserService(UserService userService) {
+    public AdminController(UserService userService, UserRepository userRepository, RoleService roleService) {
         this.userService = userService;
-    }
-    @Autowired
-    public void setUserRepository(UserRepository userRepository) {
         this.userRepository = userRepository;
-    }
-    @Autowired
-    public void setRoleService(RoleService roleService) {
         this.roleService = roleService;
     }
     @GetMapping()
