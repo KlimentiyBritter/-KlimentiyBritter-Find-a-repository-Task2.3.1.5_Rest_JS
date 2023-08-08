@@ -1,5 +1,7 @@
 package ru.kata.spring.boot_security.demo.model;
 
+import org.hibernate.annotations.Fetch;
+import org.hibernate.annotations.FetchMode;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
@@ -7,31 +9,49 @@ import javax.persistence.*;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Entity
 @Table(name="users")
 public class User implements UserDetails {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id")
     private int id;
-    @Column(name = "name")
-    private String name;
-    @Column(name = "surname")
-    private String surname;
+    @Column(name = "firstName")
+    private String firstName;
+    @Column(name = "lastName")
+    private String lastName;
+    @Column(name = "age")
+    private String age;
     @Column(name = "email")
     private String email;
-    @Column(unique = true)
-    private String username;
+    @Column(name = "password")
     private String password;
-    @ManyToMany(cascade = CascadeType.MERGE)
+    @ManyToMany(cascade = CascadeType.MERGE, fetch = FetchType.LAZY)
+    @Fetch(FetchMode.JOIN)
+    @JoinTable(name = "user_roles",
+            joinColumns = @JoinColumn(name = "user_id"),
+            inverseJoinColumns = @JoinColumn(name = "role_id")
+    )
     private Set<Role> roles;
     public User() {}
 
-    public User(String name, String surname, String email, String password, String username, Set<Role> roles) {
-        this.name = name;
-        this.surname = surname;
+    public User(String firstName, String lastName, String email, String password, Set<Role> roles) {
+        this.firstName = firstName;
+        this.lastName = lastName;
+        this.age = age;
         this.email = email;
-        this.username = username;
+        this.password = password;
+        this.roles = roles;
+    }
+
+    public User(int id, String firstName, String lastName, String email, String password, Set<Role> roles) {
+        this.id = id;
+        this.firstName = firstName;
+        this.lastName = lastName;
+        this.age = age;
+        this.email = email;
         this.password = password;
         this.roles = roles;
     }
@@ -43,20 +63,28 @@ public class User implements UserDetails {
         this.id = id;
     }
 
-    public String getName() {
-        return name;
+    public String getFirstName() {
+        return firstName;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public void setFirstName(String firstName) {
+        this.firstName = firstName;
     }
 
-    public String getSurname() {
-        return surname;
+    public String getLastName() {
+        return lastName;
     }
 
-    public void setSurname(String surname) {
-        this.surname = surname;
+    public void setLastName(String lastName) {
+        this.lastName = lastName;
+    }
+
+    public String getAge() {
+        return age;
+    }
+
+    public void setAge(String age) {
+        this.age = age;
     }
 
     public String getEmail() {
@@ -66,14 +94,6 @@ public class User implements UserDetails {
     public void setEmail(String email) {
         this.email = email;
     }
-    @Override
-    public String getUsername() {
-        return null;
-    }
-    public void setUsername(String username) {
-        this.username = username;
-    }
-
 
     public String getPassword() {
         return password;
@@ -81,6 +101,12 @@ public class User implements UserDetails {
     public void setPassword(String password) {
         this.password = password;
     }
+
+    @Override
+    public String getUsername() {
+        return firstName;
+    }
+
     public Set<Role> getRoles(){
         return roles;
     }
@@ -106,6 +132,11 @@ public class User implements UserDetails {
     @Override
     public boolean isEnabled() {
         return true;
+    }
+
+    public String getAllRoles() {
+        String role = roles.stream().map(m->m.toString()).collect(Collectors.joining(", "));
+        return role;
     }
 }
 

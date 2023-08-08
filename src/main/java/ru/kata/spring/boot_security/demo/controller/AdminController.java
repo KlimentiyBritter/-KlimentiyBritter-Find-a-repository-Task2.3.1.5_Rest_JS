@@ -5,52 +5,63 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import ru.kata.spring.boot_security.demo.model.User;
+import ru.kata.spring.boot_security.demo.repository.UserRepository;
+import ru.kata.spring.boot_security.demo.service.RoleService;
 import ru.kata.spring.boot_security.demo.service.UserService;
 import ru.kata.spring.boot_security.demo.service.UserServiceImpl;
+
+import java.security.Principal;
+import java.util.List;
 
 @Controller
 @RequestMapping("/admin")
 public class AdminController {
-    private final UserService userService;
+    private UserService userService;
+    private UserRepository userRepository;
+    private RoleService roleService;
     @Autowired
-    public AdminController(UserService userService) {
+    public void setUserService(UserService userService) {
         this.userService = userService;
     }
-    @GetMapping()
-    public String indexOfUsers(Model model){
-        //get all users from DAO & setting & we will pass on the display and presentation
-        model.addAttribute("users", userService.getListOfUsers());
-        return "show";
+    @Autowired
+    public void setUserRepository(UserRepository userRepository) {
+        this.userRepository = userRepository;
     }
-    @GetMapping("/users")
-    public String readUserById(@RequestParam("param1") Integer id, Model model) {
-        //Получим одного человека по ИД из ДАО и передадим на отображение в представление
-        model.addAttribute("param1", userService.readUserById(id));
-        return "show";
+    @Autowired
+    public void setRoleService(RoleService roleService) {
+        this.roleService = roleService;
+    }
+    @GetMapping()
+    public String indexOfUsers(Model model, Principal principal){
+        List<User> users = userService.getListOfUsers();
+        User newUser = userRepository.find(principal.getName());
+        model.addAttribute("newUser", newUser);
+        model.addAttribute("users", users);
+        model.addAttribute("allRole", roleService.getRole());
+        return "show";      //users
     }
     @GetMapping("/new")
-    public String enterNewUser(@ModelAttribute("user") User user){
+    public String enterNewUser(Model model, Principal principal){
+        User newUser = userRepository.find(principal.getName());
+        model.addAttribute("newUser", newUser);
+        User user = new User();
+        model.addAttribute("user", user);
+        model.addAttribute("allRole", roleService.getRole());
         return "new";
     }
-    @PostMapping()      //\\
+    @PostMapping("/save")
     public String createNewUser(@ModelAttribute("user") User user) {
         userService.createNewUser(user);
-        return "redirect:/users";       //Переход на страницу списка
+        return "redirect:/admin/";       //Переход на страницу списка
     }
-    @GetMapping("/{id}/edit")
-    public String editOfUsers(Model model, @PathVariable("id") int id){
-        model.addAttribute("user", userService.readUserById(id));
-        return "edit";
-    }
-    @PatchMapping("/{id}")
-    public String updateUser(@ModelAttribute("user") User user, @PathVariable("id") int id) {
+    @PutMapping("/{id}")
+    public String updateUser(@ModelAttribute("user") User user) {
         userService.updateUser(user);
-        return "redirect:/users";
+        return "redirect:/admin";
     }
-
-    @DeleteMapping("/{id}")
-    public String deleteUser(@PathVariable("id") int id) {
+    @DeleteMapping("/delete")
+    public String deleteUser(@RequestParam(value="id") int id) {
         userService.deleteById(id);
-        return "redirect:/users";
+        return "redirect:/admin/";
     }
 }

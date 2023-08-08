@@ -44,16 +44,17 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     @Override
     public User readUserById(long id) {
         Optional<User> userID = userRepository.findById(id);
-        if(userID.isPresent())
+        if(userID.isPresent()) {
             return userID.get();
-        else
+        } else {
             return null;
+        }
     }
 
     @Override
     @Transactional
     public void updateUser(User user) {
-        User currentUser = userRepository.find(user.getSurname());
+        User currentUser = userRepository.find(user.getFirstName());
         user.setRoles(currentUser.getRoles());
         user.setPassword(currentUser.getPassword());
         userRepository.save(user);
