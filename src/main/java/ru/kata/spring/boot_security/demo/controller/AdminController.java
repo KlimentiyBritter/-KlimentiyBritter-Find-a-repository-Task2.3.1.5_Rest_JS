@@ -1,61 +1,69 @@
 package ru.kata.spring.boot_security.demo.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.Resource;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+import ru.kata.spring.boot_security.demo.model.Role;
 import ru.kata.spring.boot_security.demo.model.User;
-import ru.kata.spring.boot_security.demo.repository.UserRepository;
-import ru.kata.spring.boot_security.demo.service.RoleService;
+import ru.kata.spring.boot_security.demo.repository.RoleRepository;
 import ru.kata.spring.boot_security.demo.service.UserService;
 
-import java.security.Principal;
-import java.util.List;
-
-@Controller
-@RequestMapping("/admin")
+@org.springframework.web.bind.annotation.RestController
 public class AdminController {
+
     private final UserService userService;
-    private final UserRepository userRepository;
-    private final RoleService roleService;
+    private final RoleRepository roleRepository;
+
 
     @Autowired
-    public AdminController(UserService userService, UserRepository userRepository, RoleService roleService) {
+    public AdminController(UserService userService, RoleRepository roleRepository) {
         this.userService = userService;
-        this.userRepository = userRepository;
-        this.roleService = roleService;
+        this.roleRepository = roleRepository;
     }
-    @GetMapping()
-    public String indexOfUsers(Model model, Principal principal){
-        List<User> users = userService.getListOfUsers();
-        User newUser = userRepository.find(principal.getName());
-        model.addAttribute("newUser", newUser);
-        model.addAttribute("users", users);
-        model.addAttribute("allRole", roleService.getRole());
-        return "show";      //users
+
+    @GetMapping("/main")
+    public ResponseEntity<Resource> getView() {
+        Resource resource = new ClassPathResource("templates/RestView.html");
+        HttpHeaders headersOfView = new HttpHeaders();
+        headersOfView.setContentType(MediaType.TEXT_HTML);
+        return new ResponseEntity<>(resource, headersOfView, HttpStatus.OK);
     }
-    @GetMapping("/new")
-    public String enterNewUser(Model model, Principal principal){
-        User newUser = userRepository.find(principal.getName());
-        model.addAttribute("newUser", newUser);
-        User user = new User();
-        model.addAttribute("user", user);
-        model.addAttribute("allRole", roleService.getRole());
-        return "new";
+    @GetMapping("/api/roles/management")
+    public Iterable<Role> getRoles() {
+        return roleRepository.findAll();
     }
-    @PostMapping("/save")
-    public String createNewUser(@ModelAttribute("user") User user) {
-        userService.createNewUser(user);
-        return "redirect:/admin/";       //Переход на страницу списка
+    @GetMapping("/api/users/management")
+    public Iterable<User> getUsers() {
+        return userService.getListOfUsers();
     }
-    @PutMapping("/{id}")
-    public String updateUser(@ModelAttribute("user") User user) {
-        userService.updateUser(user);
-        return "redirect:/admin";
+    @GetMapping("/api/users/auth")
+    public User getAllUsers(@AuthenticationPrincipal User user) {
+        return userService.readUserById(user.getId());
     }
-    @DeleteMapping("/delete")
-    public String deleteUser(@RequestParam(value="id") int id) {
+    @GetMapping("/api/users/management/{id}")
+    public User getUser(@PathVariable("id") Long id) {
+        return userService.readUserById(id);
+    }
+    @PostMapping("/api/users/management")
+    public ResponseEntity<User> saveUser(@RequestBody User user) {
+        System.out.println(user.getUsername());
+        User savedUser = userService.createNewUser(user);
+        return new ResponseEntity<>(savedUser, HttpStatus.CREATED);
+    }
+    @PatchMapping("/api/users/management/{id}")
+    public User updateUser(@RequestBody User user){
+        System.out.println(user.getUsername());
+        System.out.println("Updating!!!");
+        return userService.updateUser(user);
+    }
+    @DeleteMapping("/api/users/management/{id}")
+    public void deleteUser(@PathVariable Long id){
         userService.deleteById(id);
-        return "redirect:/admin/";
     }
 }

@@ -7,6 +7,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 
 import javax.persistence.*;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -16,44 +17,30 @@ import java.util.stream.Collectors;
 public class User implements UserDetails {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id")
     private int id;
     @Column(name = "firstName")
     private String firstName;
     @Column(name = "lastName")
     private String lastName;
     @Column(name = "age")
-    private String age;
-    @Column(name = "email")
+    private Byte age;
+    @Column(unique = true)
     private String email;
     @Column(name = "password")
     private String password;
-    @ManyToMany(cascade = CascadeType.MERGE, fetch = FetchType.LAZY)
-    @Fetch(FetchMode.JOIN)
+    @ManyToMany()
     @JoinTable(name = "user_roles",
             joinColumns = @JoinColumn(name = "user_id"),
             inverseJoinColumns = @JoinColumn(name = "role_id")
     )
-    private Set<Role> roles;
+    private Set<Role> roles = new HashSet<>();
     public User() {}
 
-    public User(String firstName, String lastName, String email, String password, Set<Role> roles) {
+    public User(String firstName, String lastName, Byte age, String email) {
         this.firstName = firstName;
         this.lastName = lastName;
         this.age = age;
         this.email = email;
-        this.password = password;
-        this.roles = roles;
-    }
-
-    public User(int id, String firstName, String lastName, String email, String password, Set<Role> roles) {
-        this.id = id;
-        this.firstName = firstName;
-        this.lastName = lastName;
-        this.age = age;
-        this.email = email;
-        this.password = password;
-        this.roles = roles;
     }
     public int getId() {
         return id;
@@ -79,11 +66,11 @@ public class User implements UserDetails {
         this.lastName = lastName;
     }
 
-    public String getAge() {
+    public Byte getAge() {
         return age;
     }
 
-    public void setAge(String age) {
+    public void setAge(byte age) {
         this.age = age;
     }
 
@@ -104,7 +91,7 @@ public class User implements UserDetails {
 
     @Override
     public String getUsername() {
-        return firstName;
+        return email;
     }
 
     public Set<Role> getRoles(){
@@ -137,6 +124,19 @@ public class User implements UserDetails {
     public String getAllRoles() {
         String role = roles.stream().map(m->m.toString()).collect(Collectors.joining(", "));
         return role;
+    }
+
+    @Override
+    public String toString() {
+        return "User{" +
+                "id=" + id +
+                ", firstName='" + firstName + '\'' +
+                ", lastName='" + lastName + '\'' +
+                ", age=" + age +
+                ", email='" + email + '\'' +
+                ", password='" + password + '\'' +
+                ", roles=" + roles +
+                '}';
     }
 }
 

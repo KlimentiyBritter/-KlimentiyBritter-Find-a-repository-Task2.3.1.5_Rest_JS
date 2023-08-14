@@ -1,14 +1,15 @@
 package ru.kata.spring.boot_security.demo.service;
 
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.validation.BindingResult;
 import ru.kata.spring.boot_security.demo.model.User;
 
-import java.util.List;
-//User Interface
-public interface UserService {
-    List<User> getListOfUsers(); //
-    void createNewUser(User user); //
+public interface UserService extends UserDetailsService {
+    Iterable<User> getListOfUsers();
+    User createNewUser(User user);
     User readUserById(long id);
-    void updateUser(User user); //
-    void deleteById(long id); //
-    User findUsername (String username);
+    User updateUser(User user);
+    void deleteById(long id);
+    void findUser (User user, BindingResult bindingResult);
+    Boolean isUserExistWithEmail(String email);
 }

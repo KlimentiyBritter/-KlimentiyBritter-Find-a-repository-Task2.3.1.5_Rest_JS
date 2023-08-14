@@ -1,6 +1,7 @@
 package ru.kata.spring.boot_security.demo.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.context.properties.bind.BindResult;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -10,6 +11,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.validation.BindingResult;
 import ru.kata.spring.boot_security.demo.model.Role;
 import ru.kata.spring.boot_security.demo.model.User;
 import ru.kata.spring.boot_security.demo.repository.UserRepository;
@@ -28,57 +30,57 @@ public class UserServiceImpl implements UserService, UserDetailsService {
         this.passwordEncoder = passwordEncoder;
     }
 
-    @Transactional(readOnly = true)
     @Override
-    public List<User> getListOfUsers() {
+    @Transactional (readOnly = true)
+    public Iterable<User> getListOfUsers() {
         return userRepository.findAll();
     }
 
     @Override
     @Transactional
-    public void createNewUser(User user) {
+    public User createNewUser(User user) {
         user.setPassword(passwordEncoder.encode(user.getPassword()));
-        userRepository.save(user);
+        return userRepository.save(user);
     }
 
     @Override
+    @Transactional (readOnly = true)
     public User readUserById(long id) {
-        Optional<User> userID = userRepository.findById(id);
-        if(userID.isPresent()) {
-            return userID.get();
-        } else {
-            return null;
-        }
+        return userRepository.findById(id).orElse(new User());
     }
 
     @Override
     @Transactional
-    public void updateUser(User user) {
-        User currentUser = userRepository.find(user.getFirstName());
-        user.setRoles(currentUser.getRoles());
-        user.setPassword(currentUser.getPassword());
-        userRepository.save(user);
+    public User updateUser(User user) {
+        return userRepository.save(user);
     }
 
     @Override
     @Transactional
     public void deleteById(long id) {
         userRepository.deleteById(id);
+
     }
 
     @Override
-    public User findUsername(String username) {
-        return userRepository.find(username);
+    @Transactional
+    public void findUser(User user, BindingResult bindingResult) {
+        if(user.getPassword()==null || user.getPassword().length()==0)
+            bindingResult.rejectValue("password", "error password", "password is empty");
+        if(user.getRoles().size()==0)
+            bindingResult.rejectValue("userRole", "error userRole", "User must have at least one role");
     }
 
     @Override
-    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        User user = findUsername(username);
+    @Transactional (readOnly = true)
+    public Boolean isUserExistWithEmail(String email) {
+        return userRepository.existsByEmail(email);
+    }
+
+    public User loadUserByUsername(String email) throws UsernameNotFoundException {
+        User user = userRepository.find(email);
         if(user == null)
-            throw new UsernameNotFoundException(String.format("User '%s' not found", username));
-        return new org.springframework.security.core.userdetails.User(user.getUsername(), user.getPassword(), mapRolesToAuthorities(user.getRoles()));
-    }
-    private Collection<? extends GrantedAuthority> mapRolesToAuthorities(Collection<Role> roles) {
-        return roles.stream().map(role -> new SimpleGrantedAuthority(role.getName())).collect(Collectors.toList());
+            throw new UsernameNotFoundException(email);
+        return user;
     }
 }
