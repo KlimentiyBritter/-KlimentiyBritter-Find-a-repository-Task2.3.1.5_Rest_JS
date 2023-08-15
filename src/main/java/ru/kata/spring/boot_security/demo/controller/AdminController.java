@@ -13,19 +13,14 @@ import ru.kata.spring.boot_security.demo.model.Role;
 import ru.kata.spring.boot_security.demo.model.User;
 import ru.kata.spring.boot_security.demo.repository.RoleRepository;
 import ru.kata.spring.boot_security.demo.service.UserService;
+//@org.springframework.web.bind.annotation.RestController
 
-@org.springframework.web.bind.annotation.RestController
+
+@RestController
+@RequestMapping("api/admin")
 public class AdminController {
-
     private final UserService userService;
     private final RoleRepository roleRepository;
-
-
-    @Autowired
-    public AdminController(UserService userService, RoleRepository roleRepository) {
-        this.userService = userService;
-        this.roleRepository = roleRepository;
-    }
 
     @GetMapping("/main")
     public ResponseEntity<Resource> getView() {
@@ -33,6 +28,11 @@ public class AdminController {
         HttpHeaders headersOfView = new HttpHeaders();
         headersOfView.setContentType(MediaType.TEXT_HTML);
         return new ResponseEntity<>(resource, headersOfView, HttpStatus.OK);
+    }
+    @Autowired
+    public AdminController(UserService userService, RoleRepository roleRepository) {
+        this.userService = userService;
+        this.roleRepository = roleRepository;
     }
     @GetMapping("/api/roles/management")
     public Iterable<Role> getRoles() {
